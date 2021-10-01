@@ -1,0 +1,27 @@
+image: ubuntu:18.04
+
+variables:
+  BIN_NAME: main.out
+  TEST_LOG: test.log
+
+before_script:
+  - apt-get -y update
+
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - apt-get -y install gcc g++
+    - g++ -o ${BIN_NAME} main.cpp
+  artifacts:
+    paths:
+      - ${BIN_NAME}
+
+test:
+  stage: test
+  script:
+    - ./${BIN_NAME} > ${TEST_LOG}
+    - diff test.sample ${TEST_LOG}
