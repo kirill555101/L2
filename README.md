@@ -40,6 +40,8 @@
 
 ![Класс Command и зависимые классы](class_command_inherit_graph.png)
 
+Описание классов хранится в репозитории по адресу: [http://lsx.pages.bmstu.codes/mstd/iu6-5-2021/iu6-54b-kykatashinskiy/l2/](http://lsx.pages.bmstu.codes/mstd/iu6-5-2021/iu6-54b-kykatashinskiy/l2/).
+
 ## Функция main
 
 ```cpp

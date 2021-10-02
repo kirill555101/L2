@@ -88,24 +88,22 @@ class Invoker
 private:
     std::list<std::shared_ptr<Command>> _history;
 
-    std::shared_ptr<Command> _command;
-
 public:
     void insert(const std::string &special_name, MetalType metal_type, const std::string &currency_name,
                 int count_of_currency, int count_of_coins)
     {
-        _command = std::make_shared<InsertCommand>(special_name, metal_type, currency_name,
-                                                   count_of_currency, count_of_coins);
-        _command->execute();
-        _history.push_back(_command);
+        auto command = std::make_shared<InsertCommand>(special_name, metal_type, currency_name,
+                                                       count_of_currency, count_of_coins);
+        command->execute();
+        _history.push_back(command);
     }
 
     void show()
     {
-        for (const auto &command : _history)
+        for (const auto &old_command : _history)
         {
-            _command = std::make_shared<ShowCommand>(command);
-            _command->execute();
+            auto command = std::make_shared<ShowCommand>(old_command);
+            command->execute();
         }
     }
 };
