@@ -10,6 +10,7 @@ before_script:
 stages:
   - build
   - test
+  - pages
 
 build:
   stage: build
@@ -25,3 +26,16 @@ test:
   script:
     - ./${BIN_NAME} > ${TEST_LOG}
     - diff test.sample ${TEST_LOG}
+
+pages:
+  stage: pages
+  script:
+    - apt-get -y install doxygen
+    - apt-get -y install graphviz
+    - doxygen Doxyfile.cfg
+    - mv doc/html/ public/
+  artifacts:
+    paths:
+    - public
+  only:
+  - master
