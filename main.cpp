@@ -20,22 +20,51 @@ struct Exhibit
     int count_of_currency, count_of_coins;
 };
 
+class Receiver
+{
+private:
+    std::list<Exhibit> _exhibition;
+
+public:
+    Receiver() = default;
+
+    void insert(const std::string& special_name, MetalType metal_type, const std::string& currency_name,
+                int count_of_currency, int count_of_coins)
+    {
+        _exhibition.push_back(Exhibit{ special_name, metal_type, currency_name, count_of_currency, count_of_coins });
+    }
+
+    void show()
+    {
+        for (const auto& exhibit : _exhibition)
+        {
+            std::cout << "Special name: " << exhibit.special_name << std::endl;
+            std::cout << "Metal type: " << exhibit.metal_type << std::endl;
+            std::cout << "Currency name: " << exhibit.currency_name << std::endl;
+            std::cout << "Count of currency: " << exhibit.count_of_currency << std::endl;
+            std::cout << "Count of coins: " << exhibit.count_of_coins << std::endl;
+
+            std::cout << std::endl;
+        }
+    }
+};
+
 class Command
 {
 protected:
-    std::shared_ptr<Exhibit> exhibit;
+    std::shared_ptr<Receiver> receiver;
 
 public:
     Command() = default;
 
-    Command(std::shared_ptr<Command> command)
-    {
-        exhibit = command->exhibit;
-    }
-
     virtual ~Command() = default;
 
     virtual void execute() = 0;
+
+    void setReceiver(std::shared_ptr<Receiver> receiver)
+    {
+        this->receiver = receiver;
+    }
 };
 
 class InsertCommand : public Command
@@ -59,52 +88,51 @@ public:
 
     void execute() override
     {
-        exhibit = std::make_shared<Exhibit>(Exhibit{_special_name, _metal_type, _currency_name,
-                                                    _count_of_currency, _count_of_coins});
+        receiver->insert(_special_name, _metal_type, _currency_name, _count_of_currency, _count_of_coins);
     }
 };
 
 class ShowCommand : public Command
 {
 public:
-    ShowCommand(std::shared_ptr<Command> command) : Command(command)
-    {
-    }
+    ShowCommand() = default;
 
     void execute() override
     {
-        std::cout << "Special name: " << exhibit->special_name << std::endl;
-        std::cout << "Metal type: " << exhibit->metal_type << std::endl;
-        std::cout << "Currency name: " << exhibit->currency_name << std::endl;
-        std::cout << "Count of currency: " << exhibit->count_of_currency << std::endl;
-        std::cout << "Count of coins: " << exhibit->count_of_coins << std::endl;
-
-        std::cout << std::endl;
+        receiver->show();
     }
 };
 
 class Invoker
 {
 private:
+    std::shared_ptr<Receiver> _receiver;
+
+    std::shared_ptr<Command> _command;
+
     std::list<std::shared_ptr<Command>> _history;
 
 public:
-    void insert(const std::string &special_name, MetalType metal_type, const std::string &currency_name,
+    Invoker()
+    {
+        _receiver = std::make_shared<Receiver>();
+    }
+
+    void insert(const std::string& special_name, MetalType metal_type, const std::string& currency_name,
                 int count_of_currency, int count_of_coins)
     {
-        auto command = std::make_shared<InsertCommand>(special_name, metal_type, currency_name,
-                                                       count_of_currency, count_of_coins);
-        command->execute();
-        _history.push_back(command);
+        _command = std::make_shared<InsertCommand>(special_name, metal_type, currency_name, count_of_currency,
+                                                    count_of_coins);
+        _command->setReceiver(_receiver);
+        _command->execute();
+        _history.push_back(_command);
     }
 
     void show()
     {
-        for (const auto &old_command : _history)
-        {
-            auto command = std::make_shared<ShowCommand>(old_command);
-            command->execute();
-        }
+        _command = std::make_shared<ShowCommand>();
+        _command->setReceiver(_receiver);
+        _command->execute();
     }
 };
 
